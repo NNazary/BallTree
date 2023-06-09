@@ -1,7 +1,7 @@
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class BallTree {
+
 
     BallTreeNode root;
     public BallTreeNode buildTree(List<Patient> patients, int depth){
@@ -35,10 +35,37 @@ public class BallTree {
     }
 
 
-    public List<Patient> searchTree(Patient patient, int k) {
+    public List<Patient> searchTree(Patient queryPatient, int k) {
+        //a priority queue for the k nearest neighbours
+        //the comparator compare the patient based on their  distance to the given patient
+        PriorityQueue<Patient> nearestNeighbours = new PriorityQueue<>(Comparator.comparingDouble(p-> euclideanDistance(p.attributes, queryPatient.attributes)));
+
+        // priority queue for the nodes to visit and compare based on their distance of the patient to the ggiven patient
+        PriorityQueue<BallTreeNode> nodesToVisit = new PriorityQueue<>(Comparator.comparingDouble(node -> euclideanDistance(node.patient.attributes, queryPatient.attributes)));
 
 
-        return null; // for now return null
+        nodesToVisit.add(root);
+
+        while(!nodesToVisit.isEmpty() && (nearestNeighbours.size() < k || euclideanDistance(nodesToVisit.peek().patient.attributes, queryPatient.attributes) < euclideanDistance(Objects.requireNonNull(nearestNeighbours.peek()).attributes, queryPatient.attributes))) {
+            BallTreeNode node = nodesToVisit.poll();
+
+            assert node != null;
+            nearestNeighbours.add(node.patient);
+            if(nearestNeighbours.size() > k) {
+                nearestNeighbours.poll();
+            }
+            if(node.leftChild != null){
+                nodesToVisit.add(node.leftChild);
+            }
+            if(node.rightChild!= null) {
+                nodesToVisit.add(node.rightChild);
+            }
+
+
+
+
+            }
+        return new ArrayList<>(nearestNeighbours);
     }
 
     public int predict(Patient patient, int k) {
@@ -60,6 +87,12 @@ public class BallTree {
         }
         return malignantCount> benignCount ? 1:0;
     }
+    private double euclideanDistance(double[] attributes1, double[] attributes2) {
+        double sum = 0;
+        for (int i = 0; i < attributes1.length; i++) {
+            sum += Math.pow(attributes1[i] - attributes2[i], 2);
+        }
+        return Math.sqrt(sum);
 
 
-}
+    }}
