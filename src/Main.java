@@ -24,49 +24,44 @@ public class Main {
                 patients.add(new Patient(lines.get(i)));
             }
 
+            int[] Ns = {50, 150, 250, 350, 450};
+            int[] ks = {3, 5, 7};
+            for (int N : Ns) {
+                for (int k : ks) {
+                    Collections.shuffle(patients);
+
+                    List<Patient> NPatients = patients.subList(0, N);
+                    List<Patient> testPatients = patients.subList(N, N + N / 4);
+
+                    trainAndTest(NPatients, testPatients, k);
+                }
+            }
 
 
         } catch (IOException | com.opencsv.exceptions.CsvException e) {
             e.printStackTrace();
 
         }
-        //first shuffle then take first 50 for training then take 1/4 of 50 which is 12.5 = 13 so 50+13 since they are shuffled for test
-        Collections.shuffle(patients);
-        List<Patient> fiftyPatientsTraining = patients.subList(0, 50);
-        List<Patient> testSet= patients.subList(50, 50 +13);
 
 
+    }
+
+    public static void trainAndTest(List<Patient> trainingSet, List<Patient> testSet, int k) {
         BallTree ballTree = new BallTree();
-        ballTree.root = ballTree.buildTree(fiftyPatientsTraining, 0);
+        ballTree.root = ballTree.buildTree(trainingSet, 0);
 
-        int correctPrediction = 0;
-        for(Patient testPatient: testSet) {
-            int predictedDiagnosis = ballTree.predict(testPatient, 3);
-            if (predictedDiagnosis == testPatient.diagnosis) {
-                correctPrediction++;
+        int correctPredictions = 0;
+        for (Patient patient : testSet) {
+            int prediction = ballTree.predict(patient, k);
+            if (prediction == patient.diagnosis) {
+                correctPredictions++;
             }
         }
 
 
-
-//        Collections.shuffle(patients);
-//        List<Patient> oneFiftyPatients = patients.subList(0, 150);
-//        Collections.shuffle(patients);
-//        List<Patient> twoFiftyPatients = patients.subList(0, 250);
-//        Collections.shuffle(patients);
-//        List<Patient> threeFiftyPatients = patients.subList(0, 350);
-//        Collections.shuffle(patients);
-//        List<Patient> fourFiftyPatients = patients.subList(0, 450);
-//        Collections.shuffle(patients);
-
-//        for(Patient patient: patients) {
-//            System.out.println("Patient ID: " + patient.id);
-//            System.out.println("Patient Diagnosis: " + patient.diagnosis);
-//            System.out.println("Patient Attributes: " + Arrays.toString(patient.attributes)); }
-        double accuracy = (double) correctPrediction / testSet.size();
-        System.out.println("Accuracy: " + accuracy);
-        }
+        double accuracy = 100.0 * correctPredictions / testSet.size();
+        System.out.println("N=" + trainingSet.size() + ", k=" + k + ": Accuracy = " + accuracy + "%");
 
 
+    }
 }
-
