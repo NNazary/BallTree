@@ -6,9 +6,9 @@ public class Patient {
    public Patient(String[] data) {
        this.id= data[0];
        this.diagnosis = "M".equals(data[1]) ? 1:0;
-       this.attributes = new double[data.length - 2];
-       for ( int i = 0; i< attributes.length; i++){
-          attributes[i] = Double.parseDouble(data[i + 2]);
+       this.attributes = new double[10];
+       for ( int i = 2; i< 12; i++){
+          attributes[i-2] = Double.parseDouble(data[i]);
        }
 
    }
